@@ -35,7 +35,7 @@ pub trait CurveProjective:
 
     /// Normalizes a slice of projective elements so that
     /// conversion to affine is cheap.
-    fn batch_normalization(v: &mut [Self]);
+    fn batch_normalization<S: ::std::borrow::BorrowMut<Self>>(v: &mut [S]);
 
     /// Checks if the point is already "normalized" so that
     /// cheap affine conversion is possible.
@@ -121,7 +121,8 @@ pub trait CurveAffine:
 
 /// An encoded elliptic curve point, which should essentially wrap a `[u8; N]`.
 pub trait EncodedPoint:
-    Sized + Send + Sync + AsRef<[u8]> + AsMut<[u8]> + Clone + Copy + 'static
+    Sized + Send + Sync + AsRef<[u8]> + AsMut<[u8]> + Clone + Copy
+        + PartialOrd + Ord + PartialEq + Eq + ::std::hash::Hash + 'static
 {
     type Affine: CurveAffine;
 
