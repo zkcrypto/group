@@ -1,18 +1,26 @@
+#![no_std]
 // Catch documentation errors caused by code changes.
 #![deny(intra_doc_link_resolution_failure)]
 
+#[cfg(feature = "alloc")]
+#[macro_use]
+extern crate alloc;
+
+use core::fmt;
+use core::iter::Sum;
+use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use ff::PrimeField;
 use rand::RngCore;
-use std::fmt;
-use std::iter::Sum;
-use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use subtle::{Choice, CtOption};
 
 pub mod cofactor;
 pub mod prime;
+#[cfg(feature = "alloc")]
 pub mod tests;
 
+#[cfg(feature = "alloc")]
 mod wnaf;
+#[cfg(feature = "alloc")]
 pub use self::wnaf::{Wnaf, WnafGroup};
 
 /// A helper trait for types with a group operation.

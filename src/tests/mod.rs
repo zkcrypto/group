@@ -1,7 +1,8 @@
+use alloc::vec::Vec;
+use core::ops::{Mul, Neg};
 use ff::{Field, PrimeField};
 use rand::SeedableRng;
 use rand_xorshift::XorShiftRng;
-use std::ops::{Mul, Neg};
 
 use crate::{
     prime::{PrimeCurve, PrimeCurveAffine},

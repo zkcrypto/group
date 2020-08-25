@@ -1,6 +1,7 @@
+use alloc::vec::Vec;
 use byteorder::{ByteOrder, LittleEndian};
+use core::iter;
 use ff::PrimeField;
-use std::iter;
 
 use super::Group;
 
