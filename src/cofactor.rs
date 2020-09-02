@@ -78,7 +78,8 @@ pub trait CofactorCurve:
 
 /// Affine representation of an elliptic curve point guaranteed to be
 /// in the correct prime order subgroup.
-pub trait CofactorCurveAffine: GroupEncoding
+pub trait CofactorCurveAffine:
+    GroupEncoding
     + Copy
     + Clone
     + Sized
@@ -90,10 +91,7 @@ pub trait CofactorCurveAffine: GroupEncoding
     + Eq
     + 'static
     + Neg<Output = Self>
-    + Mul<
-        <Self as CofactorCurveAffine>::Scalar,
-        Output = <Self as CofactorCurveAffine>::Curve,
-    >
+    + Mul<<Self as CofactorCurveAffine>::Scalar, Output = <Self as CofactorCurveAffine>::Curve>
     + for<'r> Mul<
         <Self as CofactorCurveAffine>::Scalar,
         Output = <Self as CofactorCurveAffine>::Curve,
