@@ -1,6 +1,6 @@
 use core::fmt;
 use core::ops::{Mul, Neg};
-use ff::{BitIterator, Endianness, PrimeField};
+use ff::PrimeField;
 use subtle::{Choice, CtOption};
 
 use crate::{prime::PrimeGroup, Curve, Group, GroupEncoding, GroupOps, GroupOpsOwned};
@@ -50,17 +50,13 @@ pub trait CofactorGroup:
     /// - `false` if `self` has non-zero torsion component and is not in the prime-order
     ///   subgroup.
     fn is_torsion_free(&self) -> Choice {
-        // Obtain the scalar field characteristic in little endian.
-        let mut char = Self::Scalar::char();
-        <Self::Scalar as PrimeField>::ReprEndianness::toggle_little_endian(&mut char);
-
         // Multiply self by the characteristic to eliminate any prime-order subgroup
         // component.
-        let bits = BitIterator::<u8, _>::new(char);
+        let bits = Self::Scalar::char_le_bits();
         let mut res = Self::identity();
-        for i in bits {
+        for i in &bits {
             res = res.double();
-            if i {
+            if *i {
                 res.add_assign(self)
             }
         }
