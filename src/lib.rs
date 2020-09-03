@@ -10,12 +10,12 @@ use core::fmt;
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use ff::PrimeField;
-use rand::RngCore;
+use rand_core::RngCore;
 use subtle::{Choice, CtOption};
 
 pub mod cofactor;
 pub mod prime;
-#[cfg(feature = "alloc")]
+#[cfg(feature = "tests")]
 pub mod tests;
 
 #[cfg(feature = "alloc")]
@@ -74,7 +74,7 @@ pub trait Group:
     /// this group.
     ///
     /// This function is non-deterministic, and samples from the user-provided RNG.
-    fn random<R: RngCore + ?Sized>(rng: &mut R) -> Self;
+    fn random(rng: impl RngCore) -> Self;
 
     /// Returns the additive identity, also known as the "neutral element".
     fn identity() -> Self;
