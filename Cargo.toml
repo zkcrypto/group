@@ -15,7 +15,7 @@ repository = "https://github.com/ebfull/group"
 edition = "2018"
 
 [dependencies]
-byteorder = { version = "1", default-features = false }
+byteorder = { version = "1", optional = true, default-features = false }
 ff = { version = "0.8", default-features = false }
 rand = { version = "0.7", optional = true, default-features = false }
 rand_core = { version = "0.5", default-features = false }
@@ -24,7 +24,7 @@ subtle = { version = "2.2.1", default-features = false }
 
 [features]
 default = ["alloc"]
-alloc = []
+alloc = ["byteorder"]
 tests = ["alloc", "rand", "rand_xorshift"]
 
 [badges]
