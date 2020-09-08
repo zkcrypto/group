@@ -26,7 +26,6 @@ pub trait PrimeCurveAffine:
     + Send
     + Sync
     + fmt::Debug
-    + fmt::Display
     + PartialEq
     + Eq
     + 'static
