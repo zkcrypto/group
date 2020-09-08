@@ -86,7 +86,6 @@ pub trait CofactorCurveAffine:
     + Send
     + Sync
     + fmt::Debug
-    + fmt::Display
     + PartialEq
     + Eq
     + 'static

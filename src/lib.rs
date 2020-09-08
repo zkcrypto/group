@@ -53,7 +53,6 @@ pub trait Group:
     Clone
     + Copy
     + fmt::Debug
-    + fmt::Display
     + Eq
     + Sized
     + Send
