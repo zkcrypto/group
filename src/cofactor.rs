@@ -46,24 +46,10 @@ pub trait CofactorGroup:
     /// prime-order subgroup.
     ///
     /// Returns:
-    /// - `true` if `self` has zero torsion component and is in the prime-order subgroup.
+    /// - `true` if `self` has trivial torsion and is in the prime-order subgroup.
     /// - `false` if `self` has non-zero torsion component and is not in the prime-order
     ///   subgroup.
-    fn is_torsion_free(&self) -> Choice {
-        // Multiply self by the characteristic to eliminate any prime-order subgroup
-        // component.
-        let bits = Self::Scalar::char_le_bits();
-        let mut res = Self::identity();
-        for i in &bits {
-            res = res.double();
-            if *i {
-                res.add_assign(self)
-            }
-        }
-
-        // If the result is the identity, there was zero torsion component!
-        res.is_identity()
-    }
+    fn is_torsion_free(&self) -> Choice;
 }
 
 /// Efficient representation of an elliptic curve point guaranteed to be

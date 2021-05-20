@@ -29,3 +29,6 @@ tests = ["alloc", "rand", "rand_xorshift"]
 
 [badges]
 maintenance = { status = "actively-developed" }
+
+[patch.crates-io]
+ff = { git = "https://github.com/zkcrypto/ff.git", branch = "main", default-features = false }
