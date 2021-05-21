@@ -6,6 +6,9 @@ and this library adheres to Rust's notion of
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `group::ff`, which re-exports the `ff` crate to make version-matching easier.
+
 ### Changed
 - MSRV is now 1.51.0.
 - Bumped `ff` to 0.10.
