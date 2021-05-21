@@ -6,6 +6,9 @@
 #[macro_use]
 extern crate alloc;
 
+// Re-export ff to make version-matching easier.
+pub use ff;
+
 use core::fmt;
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
