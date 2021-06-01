@@ -10,8 +10,8 @@ license = "MIT/Apache-2.0"
 
 description = "Elliptic curve group traits and utilities"
 documentation = "https://docs.rs/group/"
-homepage = "https://github.com/ebfull/group"
-repository = "https://github.com/ebfull/group"
+homepage = "https://github.com/zkcrypto/group"
+repository = "https://github.com/zkcrypto/group"
 edition = "2018"
 
 [dependencies]
