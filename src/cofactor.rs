@@ -59,7 +59,7 @@ pub trait CofactorCurve:
 {
     type Affine: CofactorCurveAffine<Curve = Self, Scalar = Self::Scalar>
         + Mul<Self::Scalar, Output = Self>
-        + for<'r> Mul<Self::Scalar, Output = Self>;
+        + for<'r> Mul<&'r Self::Scalar, Output = Self>;
 }
 
 /// Affine representation of an elliptic curve point guaranteed to be
@@ -78,7 +78,7 @@ pub trait CofactorCurveAffine:
     + Neg<Output = Self>
     + Mul<<Self as CofactorCurveAffine>::Scalar, Output = <Self as CofactorCurveAffine>::Curve>
     + for<'r> Mul<
-        <Self as CofactorCurveAffine>::Scalar,
+        &'r <Self as CofactorCurveAffine>::Scalar,
         Output = <Self as CofactorCurveAffine>::Curve,
     >
 {

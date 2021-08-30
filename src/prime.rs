@@ -13,13 +13,12 @@ pub trait PrimeGroup: Group + GroupEncoding {}
 pub trait PrimeCurve: Curve<AffineRepr = <Self as PrimeCurve>::Affine> + PrimeGroup {
     type Affine: PrimeCurveAffine<Curve = Self, Scalar = Self::Scalar>
         + Mul<Self::Scalar, Output = Self>
-        + for<'r> Mul<Self::Scalar, Output = Self>;
+        + for<'r> Mul<&'r Self::Scalar, Output = Self>;
 }
 
 /// Affine representation of an elliptic curve point guaranteed to be
 /// in the correct prime order subgroup.
-pub trait PrimeCurveAffine:
-    GroupEncoding
+pub trait PrimeCurveAffine: GroupEncoding
     + Copy
     + Clone
     + Sized
@@ -31,7 +30,7 @@ pub trait PrimeCurveAffine:
     + 'static
     + Neg<Output = Self>
     + Mul<<Self as PrimeCurveAffine>::Scalar, Output = <Self as PrimeCurveAffine>::Curve>
-    + for<'r> Mul<<Self as PrimeCurveAffine>::Scalar, Output = <Self as PrimeCurveAffine>::Curve>
+    + for<'r> Mul<&'r <Self as PrimeCurveAffine>::Scalar, Output = <Self as PrimeCurveAffine>::Curve>
 {
     type Scalar: PrimeField;
     type Curve: PrimeCurve<Affine = Self, Scalar = Self::Scalar>;
