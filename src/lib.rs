@@ -134,7 +134,7 @@ pub trait GroupEncoding: Sized {
     /// ```
     ///
     /// It is recommended that the default should be the all-zeroes encoding.
-    type Repr: Default + AsRef<[u8]> + AsMut<[u8]>;
+    type Repr: Copy + Default + Send + Sync + 'static + AsRef<[u8]> + AsMut<[u8]>;
 
     /// Attempts to deserialize a group element from its encoding.
     fn from_bytes(bytes: &Self::Repr) -> CtOption<Self>;
