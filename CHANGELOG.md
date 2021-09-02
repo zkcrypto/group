@@ -7,6 +7,19 @@ and this library adheres to Rust's notion of
 
 ## [Unreleased]
 
+## [0.11.0] - 2021-09-02
+### Fixed
+- The affine scalar multiplication bounds on the following traits had typos that
+  prevented multiplying by `&Self::Scalar`, which has now been fixed:
+  - `group::cofactor::{CofactorCurve::Affine, CofactorCurveAffine}`
+  - `group::prime::{PrimeCurve::Affine, PrimeCurveAffine}`
+
+### Added
+- `Copy + Send + Sync + 'static` bounds on `group::GroupEncoding::Repr`.
+
+### Changed
+- Bumped `ff` to 0.11.
+
 ## [0.10.0] - 2021-06-01
 ### Added
 - `group::ff`, which re-exports the `ff` crate to make version-matching easier.
