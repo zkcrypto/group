@@ -90,6 +90,17 @@ pub trait Group:
     /// Doubles this element.
     #[must_use]
     fn double(&self) -> Self;
+
+    /// Perform multi-scalar multiplication of the form `sum(base[i] * scalar[i])`.
+    fn multiscalar_mul(bases: &[Self], scalars: &[Self::Scalar]) -> Self {
+        assert_eq!(bases.len(), scalars.len());
+
+        let mut acc = Self::identity();
+        for (scalar, base) in scalars.into_iter().zip(bases) {
+            acc += base.mul(scalar);
+        }
+        acc
+    }
 }
 
 /// Efficient representation of an elliptic curve point guaranteed.
@@ -171,4 +182,28 @@ pub trait UncompressedEncoding: Sized {
     /// Converts this element into its uncompressed encoding, so long as it's not
     /// the point at infinity.
     fn to_uncompressed(&self) -> Self::Uncompressed;
+}
+
+/// Pre-computed values for efficient multi-scalar multiplication with fixed bases.
+pub trait MultiScalarPreparedMul: Group {
+    type Prepared: Clone + fmt::Debug + Default + Sized + Send + Sync + 'static;
+
+    /// Construct a prepared base for multi-scalar multiplication.
+    fn prepare_multiscalar_base(&self) -> Self::Prepared;
+
+    /// Perform multi-scalar multiplication of the form `sum(base[i] * scalar[i])` with
+    /// a set of fixed base points.
+    fn prepared_multiscalar_mul(bases: &[Self::Prepared], scalars: &[Self::Scalar]) -> Self;
+
+    /// Perform multi-scalar multiplication of the form `sum(base[i] * scalar[i])` with
+    /// a set of fixed base points and a set of dynamic base points.
+    fn mixed_multiscalar_mul(
+        fixed_bases: &[Self::Prepared],
+        fixed_scalars: &[Self::Scalar],
+        dyn_bases: &[Self],
+        dyn_scalars: &[Self::Scalar],
+    ) -> Self {
+        Self::prepared_multiscalar_mul(fixed_bases, fixed_scalars)
+            + Self::multiscalar_mul(dyn_bases, dyn_scalars)
+    }
 }
