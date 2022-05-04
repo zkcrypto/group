@@ -7,6 +7,11 @@ and this library adheres to Rust's notion of
 
 ## [Unreleased]
 
+## [0.12.0] - 2022-05-04
+### Changed
+- MSRV is now 1.56.0.
+- Bumped `ff` to `0.12`
+
 ## [0.11.0] - 2021-09-02
 ### Fixed
 - The affine scalar multiplication bounds on the following traits had typos that
