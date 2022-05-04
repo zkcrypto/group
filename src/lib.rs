@@ -1,6 +1,6 @@
 #![no_std]
 // Catch documentation errors caused by code changes.
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 #[cfg(feature = "alloc")]
 #[macro_use]
