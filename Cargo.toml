@@ -15,7 +15,6 @@ repository = "https://github.com/zkcrypto/group"
 edition = "2021"
 
 [dependencies]
-byteorder = { version = "1", optional = true, default-features = false }
 ff = { version = "0.12", default-features = false }
 rand = { version = "0.8", optional = true, default-features = false }
 rand_core = { version = "0.6", default-features = false }
@@ -24,7 +23,7 @@ subtle = { version = "2.2.1", default-features = false }
 
 [features]
 default = ["alloc"]
-alloc = ["byteorder"]
+alloc = []
 tests = ["alloc", "rand", "rand_xorshift"]
 
 [badges]
