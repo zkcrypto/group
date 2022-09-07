@@ -33,10 +33,11 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
     // Required so that the NAF digits fit in i64
     debug_assert!(window <= 64);
 
-    wnaf.truncate(0);
-
     let bit_len = c.as_ref().len() * 8;
     let u64_len = (bit_len + 1) / 64;
+
+    wnaf.truncate(0);
+    wnaf.reserve(bit_len);
 
     let mut c_u64 = vec![0u64; u64_len + 1];
     LittleEndian::read_u64_into(c.as_ref(), &mut c_u64[0..u64_len]);
