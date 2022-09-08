@@ -24,6 +24,10 @@ pub(crate) fn wnaf_table<G: Group>(table: &mut Vec<G>, mut base: G, window: usiz
     }
 }
 
+/// This struct represents a view of a sequence of bytes as a sequence of
+/// `u64` limbs in little-endian byte order. It maintains a current index, and
+/// allows access to the limb at that index and the one following it. Bytes
+/// beyond the end of the original buffer are treated as zero.
 struct LimbBuffer<'a> {
     buf: &'a [u8],
     cur_idx: usize,
