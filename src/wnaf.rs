@@ -171,7 +171,75 @@ pub(crate) fn wnaf_exp<G: Group>(table: &[G], wnaf: &[i64]) -> G {
     result
 }
 
-/// A "w-ary non-adjacent form" exponentiation context.
+/// A "w-ary non-adjacent form" scalar multiplication (also known as exponentiation)
+/// context.
+///
+/// # Examples
+///
+/// This struct can be used to implement several patterns:
+///
+/// ## One base, one scalar
+///
+/// For this pattern, you can use a transient `Wnaf` context:
+///
+/// ```ignore
+/// use group::Wnaf;
+///
+/// let result = Wnaf::new().scalar(&scalar).base(base);
+/// ```
+///
+/// ## Many bases, one scalar
+///
+/// For this pattern, you create a `Wnaf` context, load the scalar into it, and then
+/// process each base in turn:
+///
+/// ```ignore
+/// use group::Wnaf;
+///
+/// let mut wnaf = Wnaf::new();
+/// let mut wnaf_scalar = wnaf.scalar(&scalar);
+/// let results: Vec<_> = bases
+///     .into_iter()
+///     .map(|base| wnaf_scalar.base(base))
+///     .collect();
+/// ```
+///
+/// ## One base, many scalars
+///
+/// For this pattern, you create a `Wnaf` context, load the base into it, and then process
+/// each scalar in turn:
+///
+/// ```ignore
+/// use group::Wnaf;
+///
+/// let mut wnaf = Wnaf::new();
+/// let mut wnaf_base = wnaf.base(base, scalars.len());
+/// let results: Vec<_> = scalars
+///     .iter()
+///     .map(|scalar| wnaf_base.scalar(scalar))
+///     .collect();
+/// ```
+///
+/// ## Many bases, many scalars
+///
+/// Say you have `n` bases and `m` scalars, and want to produce `n * m` results. For this
+/// pattern, you need to cache the w-NAF tables for the bases and then compute the w-NAF
+/// form of the scalars on the fly for every base, or vice versa:
+///
+/// ```ignore
+/// use group::Wnaf;
+///
+/// let mut wnaf_contexts: Vec<_> = (0..bases.len()).map(|_| Wnaf::new()).collect();
+/// let mut wnaf_bases: Vec<_> = wnaf_contexts
+///     .iter_mut()
+///     .zip(bases)
+///     .map(|(wnaf, base)| wnaf.base(base, scalars.len()))
+///     .collect();
+/// let results: Vec<_> = wnaf_bases
+///     .iter()
+///     .flat_map(|wnaf_base| scalars.iter().map(|scalar| wnaf_base.scalar(scalar)))
+///     .collect();
+/// ```
 #[derive(Debug)]
 pub struct Wnaf<W, B, S> {
     base: B,
