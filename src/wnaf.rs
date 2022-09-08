@@ -349,7 +349,7 @@ impl<B, S: AsMut<Vec<i64>>> Wnaf<usize, B, S> {
     }
 }
 
-/// A window sized that is fixed in the type system.
+/// A window size that is fixed in the type system.
 pub struct FixedWindow<const WINDOW_SIZE: usize>;
 
 impl<G: WnafGroup, const WINDOW_SIZE: usize>
