@@ -1,5 +1,7 @@
 use alloc::vec::Vec;
 use core::iter;
+use core::marker::PhantomData;
+
 use ff::PrimeField;
 
 use super::Group;
@@ -171,7 +173,79 @@ pub(crate) fn wnaf_exp<G: Group>(table: &[G], wnaf: &[i64]) -> G {
     result
 }
 
-/// A "w-ary non-adjacent form" exponentiation context.
+/// A "w-ary non-adjacent form" scalar multiplication (also known as exponentiation)
+/// context.
+///
+/// # Examples
+///
+/// This struct can be used to implement several patterns:
+///
+/// ## One base, one scalar
+///
+/// For this pattern, you can use a transient `Wnaf` context:
+///
+/// ```ignore
+/// use group::Wnaf;
+///
+/// let result = Wnaf::new().scalar(&scalar).base(base);
+/// ```
+///
+/// ## Many bases, one scalar
+///
+/// For this pattern, you create a `Wnaf` context, load the scalar into it, and then
+/// process each base in turn:
+///
+/// ```ignore
+/// use group::Wnaf;
+///
+/// let mut wnaf = Wnaf::new();
+/// let mut wnaf_scalar = wnaf.scalar(&scalar);
+/// let results: Vec<_> = bases
+///     .into_iter()
+///     .map(|base| wnaf_scalar.base(base))
+///     .collect();
+/// ```
+///
+/// ## One base, many scalars
+///
+/// For this pattern, you create a `Wnaf` context, load the base into it, and then process
+/// each scalar in turn:
+///
+/// ```ignore
+/// use group::Wnaf;
+///
+/// let mut wnaf = Wnaf::new();
+/// let mut wnaf_base = wnaf.base(base, scalars.len());
+/// let results: Vec<_> = scalars
+///     .iter()
+///     .map(|scalar| wnaf_base.scalar(scalar))
+///     .collect();
+/// ```
+///
+/// ## Many bases, many scalars
+///
+/// Say you have `n` bases and `m` scalars, and want to produce `n * m` results. For this
+/// pattern, you pre-compute the w-NAF tables for the bases and the w-NAF forms of the
+/// scalars, and then combine them:
+///
+/// ```ignore
+/// use group::{FixedWindow, Wnaf};
+///
+/// let wnaf_bases: Vec<_> = bases
+///     .into_iter()
+///     .map(Wnaf::<FixedWindow<4>>::base)
+///     .collect();
+/// let wnaf_scalars: Vec<_> = scalars.iter().map(Wnaf::scalar).collect();
+/// let results: Vec<_> = wnaf_bases
+///     .iter()
+///     .flat_map(|base| wnaf_scalars.iter().map(|scalar| base.exp(scalar)))
+///     .collect();
+/// ```
+///
+/// Note that this pattern requires specifying a fixed window size (unlike previous
+/// patterns that picked a suitable window size internally). This is necessary to ensure
+/// in the type system that the base and scalar `Wnaf`s were computed with the same window
+/// size, allowing the result to be computed infallibly.
 #[derive(Debug)]
 pub struct Wnaf<W, B, S> {
     base: B,
@@ -272,5 +346,49 @@ impl<B, S: AsMut<Vec<i64>>> Wnaf<usize, B, S> {
     {
         wnaf_form(self.scalar.as_mut(), scalar.to_repr(), self.window_size);
         wnaf_exp(self.base.as_ref(), self.scalar.as_mut())
+    }
+}
+
+/// A window size that is fixed in the type system.
+pub struct FixedWindow<const WINDOW_SIZE: usize>;
+
+impl<G: WnafGroup, const WINDOW_SIZE: usize>
+    Wnaf<FixedWindow<WINDOW_SIZE>, PhantomData<G>, Vec<i64>>
+{
+    /// Given a scalar, compute its wNAF representation with the specified `WINDOW_SIZE`
+    /// and return a `Wnaf` object that can perform exponentiations with `Wnaf::base(..)`.
+    pub fn scalar(scalar: &<G as Group>::Scalar) -> Self {
+        let mut wnaf = vec![];
+
+        // Compute the wNAF form of the scalar.
+        wnaf_form(&mut wnaf, scalar.to_repr(), WINDOW_SIZE);
+
+        Wnaf {
+            base: PhantomData::default(),
+            scalar: wnaf,
+            window_size: FixedWindow,
+        }
+    }
+}
+
+impl<G: WnafGroup, const WINDOW_SIZE: usize> Wnaf<FixedWindow<WINDOW_SIZE>, Vec<G>, ()> {
+    /// Given a base, computes a window table with the specified `WINDOW_SIZE` and returns
+    /// a `Wnaf` object that can perform exponentiations with `Wnaf::scalar(..)`.
+    pub fn base(base: G) -> Self {
+        let mut table = vec![];
+
+        // Compute a wNAF table for the provided base and window size.
+        wnaf_table(&mut table, base, WINDOW_SIZE);
+
+        Wnaf {
+            base: table,
+            scalar: (),
+            window_size: FixedWindow,
+        }
+    }
+
+    /// Performs exponentiation given a scalar.
+    pub fn exp(&self, scalar: &Wnaf<FixedWindow<WINDOW_SIZE>, PhantomData<G>, Vec<i64>>) -> G {
+        wnaf_exp(&self.base, &scalar.scalar)
     }
 }
