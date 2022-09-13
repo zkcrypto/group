@@ -369,7 +369,7 @@ impl<F: PrimeField, const WINDOW_SIZE: usize> WnafScalar<F, WINDOW_SIZE> {
     pub fn new(scalar: &F) -> Self {
         let mut wnaf = vec![];
 
-        // Compute the wNAF form of the scalar.
+        // Compute the w-NAF form of the scalar.
         wnaf_form(&mut wnaf, scalar.to_repr(), WINDOW_SIZE);
 
         WnafScalar {
@@ -385,7 +385,7 @@ impl<F: PrimeField, const WINDOW_SIZE: usize> WnafScalar<F, WINDOW_SIZE> {
 /// This struct is designed for usage patterns that have long-term cached bases and/or
 /// scalars, or [Cartesian products] of bases and scalars. The [`Wnaf`] API enables one or
 /// the other to be cached, but requires either the base window tables or the scalar w-NAF
-/// forms to be computed repeatedly on-the-fly, which can become a significant performance
+/// forms to be computed repeatedly on the fly, which can become a significant performance
 /// issue for some use cases.
 ///
 /// `WnafBase` and [`WnafScalar`] enable an alternative trade-off: by fixing the window
@@ -423,7 +423,7 @@ impl<G: Group, const WINDOW_SIZE: usize> WnafBase<G, WINDOW_SIZE> {
     pub fn new(base: G) -> Self {
         let mut table = vec![];
 
-        // Compute a wNAF table for the provided base and window size.
+        // Compute a window table for the provided base and window size.
         wnaf_table(&mut table, base, WINDOW_SIZE);
 
         WnafBase { table }
