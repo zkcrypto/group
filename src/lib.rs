@@ -24,7 +24,7 @@ pub mod tests;
 #[cfg(feature = "alloc")]
 mod wnaf;
 #[cfg(feature = "alloc")]
-pub use self::wnaf::{FixedWindow, Wnaf, WnafGroup};
+pub use self::wnaf::{Wnaf, WnafBase, WnafGroup, WnafScalar};
 
 /// A helper trait for types with a group operation.
 pub trait GroupOps<Rhs = Self, Output = Self>:

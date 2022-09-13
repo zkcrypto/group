@@ -7,10 +7,9 @@ and this library adheres to Rust's notion of
 
 ## [Unreleased]
 ### Added
-- `group::Wnaf` APIs for caching both bases and scalars, for improved many-base
-  many-scalar performance:
-  - `group::FixedWindow`
-  - `group::Wnaf::<FixedWindow<WINDOW_SIZE>, _, _>::{base, scalar, exp}`
+- `group::{WnafBase, WnafScalar}` structs for caching precomputations of both
+  bases and scalars, for improved many-base many-scalar multiplication
+  performance.
 
 ## [0.12.0] - 2022-05-04
 ### Changed
