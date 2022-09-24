@@ -10,6 +10,9 @@ and this library adheres to Rust's notion of
 - `group::{WnafBase, WnafScalar}` structs for caching precomputations of both
   bases and scalars, for improved many-base many-scalar multiplication
   performance.
+- `impl memuse::DynamicUsage for group::{Wnaf WnafBase, WnafScalar}`, behind the
+  new `wnaf-memuse` feature flag, to enable the heap usage of these types to be
+  measured at runtime.
 
 ## [0.12.0] - 2022-05-04
 ### Changed
