@@ -21,10 +21,14 @@ rand_core = { version = "0.6", default-features = false }
 rand_xorshift = { version = "0.3", optional = true }
 subtle = { version = "2.2.1", default-features = false }
 
+# Crate for exposing the dynamic memory usage of the w-NAF structs.
+memuse = { version = "0.2", optional = true }
+
 [features]
 default = ["alloc"]
 alloc = []
 tests = ["alloc", "rand", "rand_xorshift"]
+wnaf-memuse = ["alloc", "memuse"]
 
 [badges]
 maintenance = { status = "actively-developed" }

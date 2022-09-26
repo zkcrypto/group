@@ -266,6 +266,23 @@ impl<G: Group> Wnaf<(), Vec<G>, Vec<i64>> {
     }
 }
 
+#[cfg(feature = "wnaf-memuse")]
+impl<G: Group + memuse::DynamicUsage> memuse::DynamicUsage for Wnaf<(), Vec<G>, Vec<i64>> {
+    fn dynamic_usage(&self) -> usize {
+        self.base.dynamic_usage() + self.scalar.dynamic_usage()
+    }
+
+    fn dynamic_usage_bounds(&self) -> (usize, Option<usize>) {
+        let (base_lower, base_upper) = self.base.dynamic_usage_bounds();
+        let (scalar_lower, scalar_upper) = self.scalar.dynamic_usage_bounds();
+
+        (
+            base_lower + scalar_lower,
+            base_upper.zip(scalar_upper).map(|(a, b)| a + b),
+        )
+    }
+}
+
 impl<G: WnafGroup> Wnaf<(), Vec<G>, Vec<i64>> {
     /// Given a base and a number of scalars, compute a window table and return a `Wnaf` object that
     /// can perform exponentiations with `.scalar(..)`.
@@ -316,6 +333,18 @@ impl<'a, G: Group> Wnaf<usize, &'a [G], &'a mut Vec<i64>> {
     }
 }
 
+#[cfg(feature = "wnaf-memuse")]
+impl<'a, G: Group> memuse::DynamicUsage for Wnaf<usize, &'a [G], Vec<i64>> {
+    fn dynamic_usage(&self) -> usize {
+        // The heap memory for the window table is counted in the parent `Wnaf`.
+        self.scalar.dynamic_usage()
+    }
+
+    fn dynamic_usage_bounds(&self) -> (usize, Option<usize>) {
+        self.scalar.dynamic_usage_bounds()
+    }
+}
+
 impl<'a, G: Group> Wnaf<usize, &'a mut Vec<G>, &'a [i64]> {
     /// Constructs new space for the window table while borrowing
     /// the computed scalar representation, for sending the scalar representation
@@ -326,6 +355,18 @@ impl<'a, G: Group> Wnaf<usize, &'a mut Vec<G>, &'a [i64]> {
             scalar: self.scalar,
             window_size: self.window_size,
         }
+    }
+}
+
+#[cfg(feature = "wnaf-memuse")]
+impl<'a, G: Group + memuse::DynamicUsage> memuse::DynamicUsage for Wnaf<usize, Vec<G>, &'a [i64]> {
+    fn dynamic_usage(&self) -> usize {
+        // The heap memory for the scalar representation is counted in the parent `Wnaf`.
+        self.base.dynamic_usage()
+    }
+
+    fn dynamic_usage_bounds(&self) -> (usize, Option<usize>) {
+        self.base.dynamic_usage_bounds()
     }
 }
 
@@ -361,6 +402,17 @@ impl<B, S: AsMut<Vec<i64>>> Wnaf<usize, B, S> {
 pub struct WnafScalar<F: PrimeField, const WINDOW_SIZE: usize> {
     wnaf: Vec<i64>,
     field: PhantomData<F>,
+}
+
+#[cfg(feature = "wnaf-memuse")]
+impl<F: PrimeField, const WINDOW_SIZE: usize> memuse::DynamicUsage for WnafScalar<F, WINDOW_SIZE> {
+    fn dynamic_usage(&self) -> usize {
+        self.wnaf.dynamic_usage()
+    }
+
+    fn dynamic_usage_bounds(&self) -> (usize, Option<usize>) {
+        self.wnaf.dynamic_usage_bounds()
+    }
 }
 
 impl<F: PrimeField, const WINDOW_SIZE: usize> WnafScalar<F, WINDOW_SIZE> {
@@ -416,6 +468,19 @@ impl<F: PrimeField, const WINDOW_SIZE: usize> WnafScalar<F, WINDOW_SIZE> {
 #[derive(Clone, Debug)]
 pub struct WnafBase<G: Group, const WINDOW_SIZE: usize> {
     table: Vec<G>,
+}
+
+#[cfg(feature = "wnaf-memuse")]
+impl<G: Group + memuse::DynamicUsage, const WINDOW_SIZE: usize> memuse::DynamicUsage
+    for WnafBase<G, WINDOW_SIZE>
+{
+    fn dynamic_usage(&self) -> usize {
+        self.table.dynamic_usage()
+    }
+
+    fn dynamic_usage_bounds(&self) -> (usize, Option<usize>) {
+        self.table.dynamic_usage_bounds()
+    }
 }
 
 impl<G: Group, const WINDOW_SIZE: usize> WnafBase<G, WINDOW_SIZE> {
