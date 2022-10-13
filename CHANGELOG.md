@@ -6,6 +6,8 @@ and this library adheres to Rust's notion of
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.12.1] - 2022-10-13
 ### Added
 - `group::{WnafBase, WnafScalar}` structs for caching precomputations of both
   bases and scalars, for improved many-base many-scalar multiplication
@@ -13,6 +15,9 @@ and this library adheres to Rust's notion of
 - `impl memuse::DynamicUsage for group::{Wnaf WnafBase, WnafScalar}`, behind the
   new `wnaf-memuse` feature flag, to enable the heap usage of these types to be
   measured at runtime.
+
+### Changed
+- Removed temporary allocations from `Wnaf` internals for improved performance.
 
 ## [0.12.0] - 2022-05-04
 ### Changed
