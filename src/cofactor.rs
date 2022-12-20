@@ -3,6 +3,7 @@ use core::ops::{Mul, Neg};
 use ff::PrimeField;
 use subtle::{Choice, CtOption};
 
+use crate::Identity;
 use crate::{prime::PrimeGroup, Curve, Group, GroupEncoding, GroupOps, GroupOpsOwned};
 
 /// This trait represents an element of a cryptographic group with a large prime-order
@@ -66,6 +67,7 @@ pub trait CofactorCurve:
 /// in the correct prime order subgroup.
 pub trait CofactorCurveAffine:
     GroupEncoding
+    + Identity
     + Copy
     + Clone
     + Sized
@@ -85,15 +87,8 @@ pub trait CofactorCurveAffine:
     type Scalar: PrimeField;
     type Curve: CofactorCurve<Affine = Self, Scalar = Self::Scalar>;
 
-    /// Returns the additive identity.
-    fn identity() -> Self;
-
     /// Returns a fixed generator of unknown exponent.
     fn generator() -> Self;
-
-    /// Determines if this point represents the point at infinity; the
-    /// additive identity.
-    fn is_identity(&self) -> Choice;
 
     /// Converts this element to its curve representation.
     fn to_curve(&self) -> Self::Curve;
