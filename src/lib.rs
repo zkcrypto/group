@@ -171,7 +171,7 @@ pub trait UncompressedEncoding: Sized {
 /// Obtain or determine the identity point.
 pub trait Identity: Sized {
     /// Returns the additive identity.
-    fn identity() -> Self;
+    const IDENTITY: Self;
 
     /// Determines if this point represents the point at infinity; the
     /// additive identity.
