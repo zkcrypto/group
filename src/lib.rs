@@ -92,16 +92,16 @@ pub trait Group:
     fn double(&self) -> Self;
 }
 
-/// Efficient representation of an elliptic curve point guaranteed.
-pub trait Curve:
-    Group + GroupOps<<Self as Curve>::AffineRepr> + GroupOpsOwned<<Self as Curve>::AffineRepr>
-{
+/// Efficient representation of an elliptic curve point.
+pub trait Curve: Group + GroupOps<Self::Affine> + GroupOpsOwned<Self::Affine> {
     /// The affine representation for this elliptic curve.
-    type AffineRepr;
+    type Affine: CurveAffine<Curve = Self, Scalar = Self::Scalar>
+        + Mul<Self::Scalar, Output = Self>
+        + for<'r> Mul<&'r Self::Scalar, Output = Self>;
 
     /// Converts a batch of projective elements into affine elements. This function will
     /// panic if `p.len() != q.len()`.
-    fn batch_normalize(p: &[Self], q: &mut [Self::AffineRepr]) {
+    fn batch_normalize(p: &[Self], q: &mut [Self::Affine]) {
         assert_eq!(p.len(), q.len());
 
         for (p, q) in p.iter().zip(q.iter_mut()) {
@@ -110,7 +110,42 @@ pub trait Curve:
     }
 
     /// Converts this element into its affine representation.
-    fn to_affine(&self) -> Self::AffineRepr;
+    fn to_affine(&self) -> Self::Affine;
+}
+
+/// Affine representation of an elliptic curve point.
+pub trait CurveAffine:
+    GroupEncoding
+    + Copy
+    + fmt::Debug
+    + Eq
+    + Send
+    + Sync
+    + 'static
+    + Neg<Output = Self>
+    + Mul<<Self::Curve as Group>::Scalar, Output = Self::Curve>
+    + for<'r> Mul<&'r <Self::Curve as Group>::Scalar, Output = Self::Curve>
+{
+    /// The efficient representation for this elliptic curve.
+    type Curve: Curve<Affine = Self, Scalar = Self::Scalar>;
+
+    /// Scalars modulo the order of this group's scalar field.
+    ///
+    /// This associated type is temporary, and will be removed once downstream users have
+    /// migrated to using `Curve` as the primary generic bound.
+    type Scalar: PrimeField;
+
+    /// Returns the additive identity.
+    fn identity() -> Self;
+
+    /// Returns a fixed generator of unknown exponent.
+    fn generator() -> Self;
+
+    /// Determines if this point represents the additive identity.
+    fn is_identity(&self) -> Choice;
+
+    /// Converts this affine point to its efficient representation.
+    fn to_curve(&self) -> Self::Curve;
 }
 
 pub trait GroupEncoding: Sized {
