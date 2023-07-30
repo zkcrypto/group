@@ -21,6 +21,8 @@ pub mod prime;
 #[cfg(feature = "tests")]
 pub mod tests;
 
+pub mod coordinates;
+
 #[cfg(feature = "alloc")]
 mod wnaf;
 #[cfg(feature = "alloc")]
