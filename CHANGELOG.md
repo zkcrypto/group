@@ -8,6 +8,8 @@ and this library adheres to Rust's notion of
 ## [Unreleased]
 ### Added
 - `group::CurveAffine`
+- `group::coordinates` module, containing extension traits and structs that
+  provide generic access to the coordinates of elliptic curve points.
 
 ### Changed
 - The curve-related traits have been refactored around the new `CurveAffine`
