@@ -168,12 +168,11 @@ pub trait UncompressedEncoding: Sized {
     fn to_uncompressed(&self) -> Self::Uncompressed;
 }
 
-/// Obtain or determine the identity point.
+/// Obtain or determine the identity element.
 pub trait Identity: Sized {
     /// Returns the additive identity.
     const IDENTITY: Self;
 
-    /// Determines if this point represents the point at infinity; the
-    /// additive identity.
+    /// Determines if this element is the additive identity.
     fn is_identity(&self) -> Choice;
 }
