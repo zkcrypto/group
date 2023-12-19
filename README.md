@@ -2,6 +2,13 @@
 
 `group` is a crate for working with groups over elliptic curves.
 
+## RFC process
+
+This crate follows the [zkcrypto RFC process](https://zkcrypto.github.io/rfcs/).
+If you want to propose "substantial" changes to this crate (in particular to the
+`group` traits), please [create an RFC](https://github.com/zkcrypto/rfcs) for
+wider discussion.
+
 ## License
 
 Licensed under either of
