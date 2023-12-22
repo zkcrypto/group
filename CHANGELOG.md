@@ -6,6 +6,24 @@ and this library adheres to Rust's notion of
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `group::CurveAffine`
+
+### Changed
+- The curve-related traits have been refactored around the new `CurveAffine`
+  trait:
+  - `group::Curve::AffineRepr` has been renamed to `Curve::Affine`.
+  - All of the trait methods and associated types on the following traits have
+    been removed (use `group::Curve::Affine` or the `group::CurveAffine` trait
+    instead; trait implementors must implement `group::CurveAffine` instead
+    using the same logic):
+    - `group::cofactor::CofactorCurve`
+    - `group::cofactor::CofactorCurveAffine`
+    - `group::prime::PrimeCurve`
+    - `group::prime::PrimeCurveAffine`
+  - `group::cofactor::CofactorCurveAffine` and `group::prime::PrimeCurveAffine`
+    now have blanket implementations for all types `C: group::CurveAffine` where
+    `C::Curve` implements `CofactorCurve` or `PrimeCurve` respectively.
 
 ## [0.13.0] - 2022-12-06
 ### Changed
