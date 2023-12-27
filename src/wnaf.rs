@@ -94,12 +94,12 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
     // Required by the NAF definition
     debug_assert!(window >= 2);
     // Required so that the NAF digits fit in i64
-    debug_assert!(window <= 64);
+    debug_assert!(window < 64);
 
     let bit_len = c.as_ref().len() * 8;
 
     wnaf.truncate(0);
-    wnaf.reserve(bit_len);
+    wnaf.reserve(bit_len + 1);
 
     // Initialise the current and next limb buffers.
     let mut limbs = LimbBuffer::new(c.as_ref());
@@ -109,7 +109,7 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
 
     let mut pos = 0;
     let mut carry = 0;
-    while pos < bit_len {
+    while pos <= bit_len {
         // Construct a buffer of bits of the scalar, starting at bit `pos`
         let u64_idx = pos / 64;
         let bit_idx = pos % 64;
@@ -144,6 +144,7 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
             pos += window;
         }
     }
+    wnaf.truncate(wnaf.len().saturating_sub(window - 1));
 }
 
 /// Performs w-NAF exponentiation with the provided window table and w-NAF form scalar.
@@ -502,5 +503,30 @@ impl<G: Group, const WINDOW_SIZE: usize> Mul<&WnafScalar<G::Scalar, WINDOW_SIZE>
 
     fn mul(self, rhs: &WnafScalar<G::Scalar, WINDOW_SIZE>) -> Self::Output {
         wnaf_exp(&self.table, &rhs.wnaf)
+    }
+}
+
+#[test]
+fn test_wnaf_form() {
+    fn from_wnaf(wnaf: &Vec<i64>) -> u128 {
+        wnaf.iter().rev().fold(0, |acc, next| {
+            let mut acc = acc * 2;
+            acc += *next as u128;
+            acc
+        })
+    }
+    for w in 2..64 {
+        for e in 0..=u16::MAX {
+            let mut wnaf = vec![];
+            wnaf_form(&mut wnaf, e.to_le_bytes(), w);
+            assert_eq!(e as u128, from_wnaf(&wnaf));
+        }
+    }
+    for w in 2..64 {
+        for e in u128::MAX - 10000..=u128::MAX {
+            let mut wnaf = vec![];
+            wnaf_form(&mut wnaf, e.to_le_bytes(), w);
+            assert_eq!(e, from_wnaf(&wnaf));
+        }
     }
 }
