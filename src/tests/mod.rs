@@ -7,7 +7,7 @@ use rand_xorshift::XorShiftRng;
 use crate::{
     prime::{PrimeCurve, PrimeCurveAffine},
     wnaf::WnafGroup,
-    GroupEncoding, UncompressedEncoding,
+    GroupEncoding, Identity, UncompressedEncoding,
 };
 
 pub fn curve_tests<G: PrimeCurve>() {

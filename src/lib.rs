@@ -53,7 +53,8 @@ impl<T, Rhs, Output> ScalarMulOwned<Rhs, Output> for T where T: for<'r> ScalarMu
 
 /// This trait represents an element of a cryptographic group.
 pub trait Group:
-    Clone
+    Identity
+    + Clone
     + Copy
     + fmt::Debug
     + Eq
@@ -78,14 +79,8 @@ pub trait Group:
     /// This function is non-deterministic, and samples from the user-provided RNG.
     fn random(rng: impl RngCore) -> Self;
 
-    /// Returns the additive identity, also known as the "neutral element".
-    fn identity() -> Self;
-
     /// Returns a fixed generator of the prime-order subgroup.
     fn generator() -> Self;
-
-    /// Determines if this point is the identity.
-    fn is_identity(&self) -> Choice;
 
     /// Doubles this element.
     #[must_use]
@@ -171,4 +166,13 @@ pub trait UncompressedEncoding: Sized {
     /// Converts this element into its uncompressed encoding, so long as it's not
     /// the point at infinity.
     fn to_uncompressed(&self) -> Self::Uncompressed;
+}
+
+/// Obtain or determine the identity element.
+pub trait Identity: Sized {
+    /// Returns the additive identity.
+    const IDENTITY: Self;
+
+    /// Determines if this element is the additive identity.
+    fn is_identity(&self) -> Choice;
 }
