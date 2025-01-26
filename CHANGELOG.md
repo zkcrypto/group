@@ -8,6 +8,7 @@ and this library adheres to Rust's notion of
 ## [Unreleased]
 ### Changed
 - MSRV is now 1.63.0.
+- Migrated to `ff 0.14`, `rand_core 0.9`.
 
 ## [0.13.0] - 2022-12-06
 ### Changed
