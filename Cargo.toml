@@ -32,3 +32,6 @@ wnaf-memuse = ["alloc", "memuse"]
 
 [badges]
 maintenance = { status = "actively-developed" }
+
+[patch.crates-io]
+ff = { git = "https://github.com/zkcrypto/ff.git", branch = "release-0.14.0" }
