@@ -76,7 +76,7 @@ pub trait Group:
     /// this group.
     ///
     /// This function is non-deterministic, and samples from the user-provided RNG.
-    fn random(rng: impl RngCore) -> Self;
+    fn random<R: RngCore + ?Sized>(rng: &mut R) -> Self;
 
     /// Returns the additive identity, also known as the "neutral element".
     fn identity() -> Self;
