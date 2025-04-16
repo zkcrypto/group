@@ -106,6 +106,12 @@ pub trait Group:
     /// Doubles this element.
     #[must_use]
     fn double(&self) -> Self;
+
+    /// Multiply by the generator of the prime-order subgroup.
+    #[must_use]
+    fn mul_by_generator(scalar: &Self::Scalar) -> Self {
+        Self::generator() * scalar
+    }
 }
 
 /// Efficient representation of an elliptic curve point guaranteed.
