@@ -255,6 +255,12 @@ pub struct Wnaf<W, B, S> {
     window_size: W,
 }
 
+impl<G: Group> Default for Wnaf<(), Vec<G>, Vec<i64>> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<G: Group> Wnaf<(), Vec<G>, Vec<i64>> {
     /// Construct a new wNAF context without allocating.
     pub fn new() -> Self {
