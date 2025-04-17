@@ -378,8 +378,8 @@ fn random_transformation_tests<G: PrimeCurve>() {
     for _ in 0..10 {
         let mut v = (0..1000).map(|_| G::random(&mut rng)).collect::<Vec<_>>();
 
-        use rand::distributions::{Distribution, Uniform};
-        let between = Uniform::new(0, 1000);
+        use rand::distr::{Distribution, Uniform};
+        let between = Uniform::new(0, 1000).unwrap();
         // Sprinkle in some normalized points
         for _ in 0..5 {
             v[between.sample(&mut rng)] = G::identity();

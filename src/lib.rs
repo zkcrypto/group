@@ -9,11 +9,12 @@ extern crate alloc;
 // Re-export ff to make version-matching easier.
 pub use ff;
 
+use core::convert::Infallible;
 use core::fmt;
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use ff::PrimeField;
-use rand_core::RngCore;
+use rand_core::{RngCore, TryRngCore};
 use subtle::{Choice, CtOption};
 
 pub mod cofactor;
@@ -76,7 +77,22 @@ pub trait Group:
     /// this group.
     ///
     /// This function is non-deterministic, and samples from the user-provided RNG.
-    fn random(rng: impl RngCore) -> Self;
+    fn random<R: RngCore + ?Sized>(rng: &mut R) -> Self {
+        Self::try_from_rng(rng)
+            .map_err(|e: Infallible| e)
+            .expect("Infallible failed")
+
+        // NOTE: once MSRV gets to 1.82 remove the map_err/expect and use
+        // let Ok(out) = Self::try_from_rng(rng);
+        // out
+        // See: https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#omitting-empty-types-in-pattern-matching
+    }
+
+    /// Returns an element chosen uniformly at random from the non-identity elements of
+    /// this group.
+    ///
+    /// This function is non-deterministic, and samples from the user-provided RNG.
+    fn try_from_rng<R: TryRngCore + ?Sized>(rng: &mut R) -> Result<Self, R::Error>;
 
     /// Returns the additive identity, also known as the "neutral element".
     fn identity() -> Self;
@@ -90,6 +106,12 @@ pub trait Group:
     /// Doubles this element.
     #[must_use]
     fn double(&self) -> Self;
+
+    /// Multiply by the generator of the prime-order subgroup.
+    #[must_use]
+    fn mul_by_generator(scalar: &Self::Scalar) -> Self {
+        Self::generator() * scalar
+    }
 }
 
 /// Efficient representation of an elliptic curve point guaranteed.
