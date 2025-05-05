@@ -12,7 +12,7 @@ pub use ff;
 use core::fmt;
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
-use ff::PrimeField;
+use ff::{Field, PrimeField};
 use rand_core::RngCore;
 use subtle::{Choice, CtOption};
 
@@ -96,6 +96,9 @@ pub trait Group:
 pub trait Curve:
     Group + GroupOps<<Self as Curve>::AffineRepr> + GroupOpsOwned<<Self as Curve>::AffineRepr>
 {
+    /// The base field of the elliptic curve.
+    type Base: Field;
+
     /// The affine representation for this elliptic curve.
     type AffineRepr;
 
