@@ -70,7 +70,7 @@ pub trait Group:
     + ScalarMulOwned<<Self as Group>::Scalar>
 {
     /// Scalars modulo the order of this group's scalar field.
-    type Scalar: PrimeField;
+    type Scalar: Field;
 
     /// Returns an element chosen uniformly at random from the non-identity elements of
     /// this group.

@@ -7,6 +7,10 @@ and this library adheres to Rust's notion of
 
 ## [Unreleased]
 
+### Changed
+
+- `Group::Scalar` is now bound by `ff::Field` instead of `ff::PrimeField`.
+
 ## [0.13.0] - 2022-12-06
 ### Changed
 - Bumped `ff` to `0.13`
