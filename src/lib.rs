@@ -14,7 +14,7 @@ use core::fmt;
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use ff::PrimeField;
-use rand_core::{RngCore, TryRngCore};
+use rand_core::{Rng, TryRng};
 use subtle::{Choice, CtOption};
 
 pub mod cofactor;
@@ -77,7 +77,7 @@ pub trait Group:
     /// this group.
     ///
     /// This function is non-deterministic, and samples from the user-provided RNG.
-    fn random<R: RngCore + ?Sized>(rng: &mut R) -> Self {
+    fn random<R: Rng + ?Sized>(rng: &mut R) -> Self {
         Self::try_from_rng(rng)
             .map_err(|e: Infallible| e)
             .expect("Infallible failed")
@@ -92,7 +92,7 @@ pub trait Group:
     /// this group.
     ///
     /// This function is non-deterministic, and samples from the user-provided RNG.
-    fn try_from_rng<R: TryRngCore + ?Sized>(rng: &mut R) -> Result<Self, R::Error>;
+    fn try_from_rng<R: TryRng + ?Sized>(rng: &mut R) -> Result<Self, R::Error>;
 
     /// Returns the additive identity, also known as the "neutral element".
     fn identity() -> Self;
