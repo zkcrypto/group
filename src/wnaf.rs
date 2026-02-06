@@ -104,8 +104,8 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
     // Initialise the current and next limb buffers.
     let mut limbs = LimbBuffer::new(c.as_ref());
 
-    let width = 1u64 << window;
-    let window_mask = width - 1;
+    let width = 1u128 << window;
+    let window_mask = (width - 1) as u64; // max `width` is `1 << 64 == u64::MAX + 1`
 
     let mut pos = 0;
     let mut carry = 0;
@@ -133,12 +133,13 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
             wnaf.push(0);
             pos += 1;
         } else {
-            wnaf.push(if window_val < width / 2 {
+            // max `width` is `1 << 64`, which becomes `1 << 63` when divided by 2, which fits `u64`
+            wnaf.push(if window_val < (width / 2) as u64 {
                 carry = 0;
                 window_val as i64
             } else {
                 carry = 1;
-                (window_val as i64).wrapping_sub(width as i64)
+                (window_val as i128).wrapping_sub(width as i128) as i64
             });
             wnaf.extend(iter::repeat(0).take(window - 1));
             pos += window;
