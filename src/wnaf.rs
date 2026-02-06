@@ -94,7 +94,7 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
     // Required by the NAF definition
     debug_assert!(window >= 2);
     // Required so that the NAF digits fit in i64
-    debug_assert!(window < 64);
+    debug_assert!(window <= 64);
 
     let bit_len = c.as_ref().len() * 8;
 
@@ -145,6 +145,8 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
             pos += window;
         }
     }
+
+    // Remove trailing zeros left by the loop above
     wnaf.truncate(wnaf.len().saturating_sub(window - 1));
 }
 
@@ -511,21 +513,30 @@ impl<G: Group, const WINDOW_SIZE: usize> Mul<&WnafScalar<G::Scalar, WINDOW_SIZE>
 fn test_wnaf_form() {
     fn from_wnaf(wnaf: &Vec<i64>) -> u128 {
         wnaf.iter().rev().fold(0, |acc, next| {
-            let mut acc = acc * 2;
-            acc += *next as u128;
-            acc
+            // If one of the least-significant w-NAF limbs is negative, `acc` may be large
+            // (due to the result being represented as a `u128`). `wrapping_mul` wraps at
+            // the boundary of the type; in this case, it has the effect of doubling the
+            // equivalent signed value:
+            //         acc = -x = u128::MAX + 1 - x
+            //     2 * acc = 2 * (u128::MAX + 1 - x)
+            //             = 2 * (u128::MAX + 1) - 2x
+            //             = -2x as u128
+            let acc = acc.wrapping_mul(2);
+            // Rust signed-to-unsigned casts add or subtract `T::MAX + 1` until the value
+            // fits into the new type. A wrapping addition of the new type is therefore
+            // equivalent to a wrapping subtraction of the magnitude of the original type.
+            acc.wrapping_add(*next as u128)
         })
     }
+    let mut wnaf = Vec::with_capacity(129);
     for w in 2..64 {
         for e in 0..=u16::MAX {
-            let mut wnaf = vec![];
             wnaf_form(&mut wnaf, e.to_le_bytes(), w);
             assert_eq!(e as u128, from_wnaf(&wnaf));
         }
     }
     for w in 2..64 {
         for e in u128::MAX - 10000..=u128::MAX {
-            let mut wnaf = vec![];
             wnaf_form(&mut wnaf, e.to_le_bytes(), w);
             assert_eq!(e, from_wnaf(&wnaf));
         }
