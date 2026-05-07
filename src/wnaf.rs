@@ -150,23 +150,42 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
 ///
 /// This function must be provided a `table` and `wnaf` that were constructed with
 /// the same window size; otherwise, it may panic or produce invalid results.
+#[inline]
 pub(crate) fn wnaf_exp<G: Group>(table: &[G], wnaf: &[i64]) -> G {
-    let mut result = G::identity();
+    wnaf_multi_exp(&[table], &[wnaf])
+}
 
+/// Performs w-NAF multi-exponentiation using the interleaved window method, also known as
+/// Straus' method.
+///
+/// The key insight is that when computing this sum by means of additions and doublings, the
+/// doublings can be shared by performing the additions within an inner loop.
+///
+/// This function must be provided with `tables` and `wnafs` that were constructed with
+/// the same window size; otherwise, it may panic or produce invalid results.
+pub(crate) fn wnaf_multi_exp<G: Group>(tables: &[&[G]], wnafs: &[&[i64]]) -> G {
+    debug_assert_eq!(tables.len(), wnafs.len());
+    let window_size = wnafs.iter().map(|w| w.len()).max().unwrap_or(0);
+
+    let mut result = G::identity();
     let mut found_one = false;
 
-    for n in wnaf.iter().rev() {
+    for i in (0..window_size).rev() {
+        // Only double once per iteration of the loop
         if found_one {
             result = result.double();
         }
 
-        if *n != 0 {
-            found_one = true;
+        for (&table, &wnaf) in tables.iter().zip(wnafs.iter()) {
+            let n = wnaf.get(i).copied().unwrap_or(0);
+            if n != 0 {
+                found_one = true;
 
-            if *n > 0 {
-                result += &table[(n / 2) as usize];
-            } else {
-                result -= &table[((-n) / 2) as usize];
+                if n > 0 {
+                    result += &table[(n / 2) as usize];
+                } else {
+                    result -= &table[((-n) / 2) as usize];
+                }
             }
         }
     }
@@ -498,6 +517,21 @@ impl<G: Group, const WINDOW_SIZE: usize> WnafBase<G, WINDOW_SIZE> {
         wnaf_table(&mut table, base, WINDOW_SIZE);
 
         WnafBase { table }
+    }
+
+    /// Perform a multiscalar multiplication.
+    pub fn multiscalar_mul<'a, I, J>(scalars: I, bases: J) -> G
+    where
+        I: Iterator<Item = &'a WnafScalar<G::Scalar, WINDOW_SIZE>>,
+        J: Iterator<Item = &'a Self>,
+    {
+        let wnafs = scalars
+            .map(|scalar| scalar.wnaf.as_slice())
+            .collect::<Vec<_>>();
+
+        let tables = bases.map(|base| base.table.as_slice()).collect::<Vec<_>>();
+
+        wnaf_multi_exp(tables.as_slice(), wnafs.as_slice())
     }
 }
 
