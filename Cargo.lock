@@ -4,9 +4,8 @@ version = 3
 
 [[package]]
 name = "ff"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ded41244b729663b1e574f1b4fb731469f69f79c17667b5d776b16cda0479449"
+version = "0.13.1"
+source = "git+https://github.com/TalDerei/ff.git?branch=le-serialization#2db5b47866f9ff76f8b9873074ecac65a083e3ad"
 dependencies = [
  "rand_core",
  "subtle",

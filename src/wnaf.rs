@@ -309,7 +309,7 @@ impl<G: WnafGroup> Wnaf<(), Vec<G>, Vec<i64>> {
         let window_size = 4;
 
         // Compute the wNAF form of the scalar.
-        wnaf_form(&mut self.scalar, scalar.to_repr(), window_size);
+        wnaf_form(&mut self.scalar, scalar.to_le_repr(), window_size);
 
         // Return a Wnaf object that mutably borrows the base storage location, but
         // immutably borrows the computed wNAF form scalar location.
@@ -387,7 +387,7 @@ impl<B, S: AsMut<Vec<i64>>> Wnaf<usize, B, S> {
     where
         B: AsRef<[G]>,
     {
-        wnaf_form(self.scalar.as_mut(), scalar.to_repr(), self.window_size);
+        wnaf_form(self.scalar.as_mut(), scalar.to_le_repr(), self.window_size);
         wnaf_exp(self.base.as_ref(), self.scalar.as_mut())
     }
 }
@@ -422,7 +422,7 @@ impl<F: PrimeField, const WINDOW_SIZE: usize> WnafScalar<F, WINDOW_SIZE> {
         let mut wnaf = vec![];
 
         // Compute the w-NAF form of the scalar.
-        wnaf_form(&mut wnaf, scalar.to_repr(), WINDOW_SIZE);
+        wnaf_form(&mut wnaf, scalar.to_le_repr(), WINDOW_SIZE);
 
         WnafScalar {
             wnaf,
