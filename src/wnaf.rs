@@ -144,6 +144,10 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
             pos += window;
         }
     }
+
+    if carry > 0 {
+        wnaf.push(carry as i64);
+    }
 }
 
 /// Performs w-NAF exponentiation with the provided window table and w-NAF form scalar.
@@ -508,5 +512,17 @@ impl<G: Group, const WINDOW_SIZE: usize> Mul<&WnafScalar<G::Scalar, WINDOW_SIZE>
 
     fn mul(self, rhs: &WnafScalar<G::Scalar, WINDOW_SIZE>) -> Self::Output {
         wnaf_exp(&self.table, &rhs.wnaf)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::wnaf_form;
+
+    #[test]
+    fn wnaf_form_keeps_final_carry() {
+        let mut wnaf = vec![];
+        wnaf_form(&mut wnaf, [0xff], 4);
+        assert_eq!(wnaf, vec![-1, 0, 0, 0, 0, 0, 0, 0, 1]);
     }
 }
