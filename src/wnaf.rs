@@ -99,17 +99,18 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
     let bit_len = c.as_ref().len() * 8;
 
     wnaf.truncate(0);
-    wnaf.reserve(bit_len);
+    wnaf.reserve(bit_len + 1);
 
     // Initialise the current and next limb buffers.
     let mut limbs = LimbBuffer::new(c.as_ref());
 
-    let width = 1u64 << window;
-    let window_mask = width - 1;
+    let width_div_2 = 1u64 << (window - 1); // window is asserted `2..=64` above
+    let width = (width_div_2 as i128) * 2; // for conditionally subtracting from `window_val`
+    let window_mask = width_div_2 | (width_div_2 - 1); // fill in 1s for all the lower 0 bits
 
     let mut pos = 0;
     let mut carry = 0;
-    while pos < bit_len {
+    while pos <= bit_len {
         // Construct a buffer of bits of the scalar, starting at bit `pos`
         let u64_idx = pos / 64;
         let bit_idx = pos % 64;
@@ -133,17 +134,20 @@ pub(crate) fn wnaf_form<S: AsRef<[u8]>>(wnaf: &mut Vec<i64>, c: S, window: usize
             wnaf.push(0);
             pos += 1;
         } else {
-            wnaf.push(if window_val < width / 2 {
+            wnaf.push(if window_val < width_div_2 {
                 carry = 0;
                 window_val as i64
             } else {
                 carry = 1;
-                (window_val as i64).wrapping_sub(width as i64)
+                ((window_val as i128) - width) as i64
             });
             wnaf.extend(iter::repeat(0).take(window - 1));
             pos += window;
         }
     }
+
+    // Remove trailing zeros left by the loop above
+    wnaf.truncate(wnaf.len().saturating_sub(window - 1));
 }
 
 /// Performs w-NAF exponentiation with the provided window table and w-NAF form scalar.
@@ -508,5 +512,39 @@ impl<G: Group, const WINDOW_SIZE: usize> Mul<&WnafScalar<G::Scalar, WINDOW_SIZE>
 
     fn mul(self, rhs: &WnafScalar<G::Scalar, WINDOW_SIZE>) -> Self::Output {
         wnaf_exp(&self.table, &rhs.wnaf)
+    }
+}
+
+#[test]
+fn test_wnaf_form() {
+    fn from_wnaf(wnaf: &Vec<i64>) -> u128 {
+        wnaf.iter().rev().fold(0, |acc, next| {
+            // If one of the least-significant w-NAF limbs is negative, `acc` may be large
+            // (due to the result being represented as a `u128`). `wrapping_mul` wraps at
+            // the boundary of the type; in this case, it has the effect of doubling the
+            // equivalent signed value:
+            //         acc = -x = u128::MAX + 1 - x
+            //     2 * acc = 2 * (u128::MAX + 1 - x)
+            //             = 2 * (u128::MAX + 1) - 2x
+            //             = -2x as u128
+            let acc = acc.wrapping_mul(2);
+            // Rust signed-to-unsigned casts add or subtract `T::MAX + 1` until the value
+            // fits into the new type. A wrapping addition of the new type is therefore
+            // equivalent to a wrapping subtraction of the magnitude of the original type.
+            acc.wrapping_add(*next as u128)
+        })
+    }
+    let mut wnaf = Vec::with_capacity(129);
+    for w in 2..64 {
+        for e in 0..=u16::MAX {
+            wnaf_form(&mut wnaf, e.to_le_bytes(), w);
+            assert_eq!(e as u128, from_wnaf(&wnaf));
+        }
+    }
+    for w in 2..64 {
+        for e in u128::MAX - 10000..=u128::MAX {
+            wnaf_form(&mut wnaf, e.to_le_bytes(), w);
+            assert_eq!(e, from_wnaf(&wnaf));
+        }
     }
 }
