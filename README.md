@@ -1,4 +1,4 @@
-# group [![Crates.io](https://img.shields.io/crates/v/group.svg)](https://crates.io/crates/group) #
+# group [![Crates.io](https://img.shields.io/crates/v/group.svg)](https://crates.io/crates/group) [![Documentation](https://docs.rs/group/badge.svg)](https://docs.rs/group) #
 
 `group` is a crate for working with groups over elliptic curves.
 
