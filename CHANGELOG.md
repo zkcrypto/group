@@ -6,6 +6,9 @@ and this library adheres to Rust's notion of
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `group::coordinates` module, containing extension traits and structs that
+  provide generic access to the coordinates of elliptic curve points.
 
 ## [0.14.0] - 2026-06-01
 ### Added
